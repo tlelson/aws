@@ -1,9 +1,19 @@
 # S3File 
 
-## Example
+Implements `Read`, `Seek`, `ReadAt` methods on S3 files so that operations
+typically expecting 'file-like' objects are able to use S3 files.
 
-Suppose you have large zip archives in S3.  They include large video files, but you only want the json metadata file stored with it. You want to do it in lambda without block storage (in memory).
+## Example 1 -- JSON filter
 
-```go
+Suppose you have large zip archives in S3.  They include large video files, but
+you only want the json metadata file stored with it. You want to do it in
+lambda without block storage (in memory).
 
-```
+[JSON Filter](./examples/zip_filter/zip_filter.go)
+
+## Example 2 -- Tar archive
+
+Compress a list of S3 files into a tar archive on S3 without using disk or
+unbounded memory.
+
+[Tar Archive](./examples/tar_maker/tar_maker.go)
