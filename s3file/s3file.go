@@ -19,7 +19,7 @@ type S3File struct {
 	Key    string
 
 	s3Client S3Clienter
-	offset   int // Position in file
+	pos      int64 // Position in file
 	info     *S3FileInfo
 }
 
@@ -37,7 +37,22 @@ func NewS3File(bucket, key string, s3c S3Clienter) (*S3File, error) {
 }
 
 func (o *S3File) Seek(offset int64, whence int) (int64, error) {
-	return 0, fmt.Errorf("not implemented")
+	switch whence {
+	default:
+		return 0, fmt.Errorf("bad 'whence': %v", whence)
+	case io.SeekStart:
+		offset = 0
+	case io.SeekCurrent:
+		offset += o.pos
+	case io.SeekEnd:
+		offset += o.pos
+	}
+
+	if offset < 0 {
+		return 0, fmt.Errorf("invalid offset: %v", offset)
+	}
+	o.pos = offset
+	return offset, nil
 }
 
 // ReadAt reads bytes into p starting at byte offset off from a file stored in AWS S3. N.B every
@@ -72,6 +87,18 @@ func (o *S3File) ReadAt(p []byte, off int64) (n int, err error) {
 		err = nil
 	}
 
+	return n, err
+}
+
+func (o *S3File) Read(p []byte) (n int, err error) {
+	if o.pos >= o.info.Size() {
+		return 0, io.EOF
+	}
+
+	n, err = o.ReadAt(p, o.pos)
+	// Actual bytes read might be less than the buffer size.  Only update the position with what was
+	// read. Let the next attempt read the extra data.
+	o.pos += int64(n)
 	return n, err
 }
 
