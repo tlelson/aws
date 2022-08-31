@@ -3,6 +3,19 @@
 Implements `Read`, `Seek`, `ReadAt` methods on S3 files so that operations
 typically expecting 'file-like' objects are able to use S3 files.
 
+## Usage 
+
+1. Ensure valid AWS credentials are present on your system/shell
+2. Ensure source files for the given example are present in s3 
+3. Change 'bucket' and 'key' fields in examples accordingly
+4. Run the code
+
+```
+go mod init main 
+go mod tidy 
+go run example.go
+```
+
 ## Example 1 -- JSON filter
 
 Suppose you have large zip archives in S3.  They include large video files, but
